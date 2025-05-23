@@ -30,7 +30,7 @@ Function Signature:
 Functional Requirement:
 {func_req}
 
-Please generate 3 Python unit test cases using unittest format. 
+Please generate Python unit test cases using unittest format. 
 Only return the test method code (without imports or main block).
     """
 
