@@ -2,9 +2,11 @@
 Scenario-enriched LLM-based framework for automatic test case generation, bug detection, and code evaluation.
 
 Scenario-Driven Test Case Generation with Autonomous Agents
+
 🚀 Overview
 
 TestCopilot is a multi-agent framework designed to automate software test case generation using Large Language Models (LLMs). It integrates scenario-enriched prompting, bug detection, and coverage analysis to produce high-quality and maintainable test suites. The system is benchmarked on HumanEval and MBPP, demonstrating state-of-the-art performance across correctness, coverage, and maintainability metrics.
+
 🔍 Motivation
 
 Traditional test generation methods often:
@@ -20,12 +22,12 @@ To address these issues, TestCopilot employs a context-aware, multi-agent prompt
 📊 Performance Highlights
 
 TestCopilot significantly outperforms existing models:
-Metric	Zero-Shot	ARCHCODE	TestCopilot
-TCE (HumanEval)	79.35%	46.91%	99.3%
-DDP (HumanEval)	20.64%	46.91%	99.7%
-Function Coverage	80.0%	83.5%	89.5%
-Bugs Detected (HumanEval)	153	58	179
-False Alarms	143	2	0
+Metric	TestCopilot
+TCE (HumanEval)	99.3%
+DDP (HumanEval)	 99.7%
+Function Coverage	89.5%
+Bugs Detected (HumanEval)	179
+False Alarms	0
 🔑 Key Features
 ✅ Scenario-Enriched Prompting
 
@@ -43,13 +45,12 @@ Fixes incomplete or incorrect test cases using iterative improvement agents.
 📦 TestCopilot/
 │
 ├── 📂 dataset/                  # HumanEval / MBPP test scenario datasets
-│   ├── testcases.json
-│   ├── scenarios.json
+│   ├── testcases.xlsx
+│   ├── scenarios.xlsx
 │   ├── code_files/
 │
 ├── 📂 agents/                   # Multi-agent modules
-│   ├── Evaluator.py            # Test generation agent
-│   ├── fixer.py                # Test case repair agent
+│   ├── Evaluator and fixer.py            # Test evaluation and test fixer agent
 │
 ├── 📂 evaluation/              # Evaluation and metric calculation
 │   ├── coverage_metrics.py
@@ -59,17 +60,12 @@ Fixes incomplete or incorrect test cases using iterative improvement agents.
 ├── 📂 results/                 # Output logs, Excel summaries, comparison tables
 │   ├── HumanEval_metrics.xlsx
 │   ├── MBPP_metrics.xlsx
-│
-├── 📂 scripts/                 # Run and automation scripts
-│   ├── run_testcopilot.py
-│   ├── batch_process.py
-│
 ├── 📂 models/                  # LLM invocation and management
 │   ├── openai_agent.py
 │   ├── DeepSeek_agent.py
 │   
 │
-├── .env                        # API Keys (OpenAI, Groq, Anthropic)
+├── .env                        # API Keys (OpenAI,DeepSeek)
 ├── requirements.txt           # Required packages
 ├── README.md                  # Documentation file
 
@@ -90,6 +86,7 @@ scikit-learn
 transformers
 sentence-transformers
 Radon
+PyTest_cov
 
 
 
@@ -131,6 +128,8 @@ Use:
 python scripts/run_testcopilot.py
 
 Results are saved in /results/ as .xlsx or .json.
+
+
 📦 Dataset Access
 
 Due to size limits, datasets and pretrained outputs are stored externally.
