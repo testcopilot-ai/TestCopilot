@@ -54,66 +54,23 @@ Fixes incomplete or incorrect test cases using iterative improvement agents.
 │   ├── MBPP_metrics.xlsx
 ├── 📂 models/                  # LLM invocation and management
 │   ├── openai_agent.py
-│   ├── DeepSeek_agent.py
-│   
+│   ├── DeepSeek_agent.py  
 │
-├── .env                        # API Keys (OpenAI,DeepSeek)
+├── .env                        # API Keys (OpenAI, DeepSeek)
 ├── requirements.txt           # Required packages
 ├── README.md                  # Documentation file
 ```
 
-📌 Requirements
+# 📌 Requirements
 🖥️ System
 
     Python 3.9+
 
     Internet access for LLM API calls
 
-📦 Python Libraries
-
-openai
-pandas
-coverage
-scikit-learn
-transformers
-sentence-transformers
-Radon
-PyTest_cov
-
-
-
 Install them with:
 
 pip install -r requirements.txt
-
-🌐 API Keys
-
-TestCopilot uses multiple LLM APIs. Set your keys in a .env file or as environment variables:
-
-export OPENAI_API_KEY="your-key"
-export DeepSeek_API_KEY="your-key"
-
-🔍 Evaluation and Metrics
-
-Evaluation metrics include:
-
-    Function Coverage
-
-    Statement Coverage
-
-    Branch Coverage
-
-    Path Coverage
-
-    Integration Coverage
-
-    TCE (Test Case Effectiveness)
-
-    DDP (Defect Detection Power)
-
-    Maintainability Index
-
-    Bugs Detected vs False Alarms
 
 ## Running TestCopilot
 
@@ -125,7 +82,7 @@ python scripts/run_testcopilot.py --input_dir path/to/your/input --output_dir pa
 
 ## 📦 Dataset Access
 
-Due to size limits, datasets and pretrained outputs are stored externally.
+Due to size limits, datasets and pre-trained outputs are stored externally.
 
 📥 Download Dataset from Google Drive
 🔗 HumanEval + MBPP TestCopilot Dataset (provide your real link)
