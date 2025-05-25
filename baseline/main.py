@@ -46,7 +46,7 @@ def main():
     # Replace with your actual  API key
     api_key = "Add your api key"
     input_excel = "HumanEvaluZero.xlsx"  # Your input file
-    output_excel = "/Zerogenerated_test_cases_HumanEval.xlsx"  # Output file
+    output_excel = "Zerogenerated_test_cases_HumanEval.xlsx"  # Output file
 
     try:
         data = read_excel_data(input_excel)
