@@ -92,7 +92,7 @@ def compute_metrics(y_true, y_pred):
 
 def main():
     # Load dataset
-    file_path = "C:/Users/Furqan/Desktop/prompt engineering/Dataset/Scenarios/Embpp_Scanerio_testcases.xlsx"
+    file_path = "mbpp_Scanerio_testcases.xlsx"
     df = pd.read_excel(file_path, sheet_name="Лист1")
 
     # Strip spaces from column names
@@ -165,7 +165,7 @@ def main():
 
     # Save results to Excel
     results_df = pd.DataFrame(results)
-    output_file_path = "C:/Users/Furqan/Desktop/prompt engineering/Dataset/Scenarios/Embpp-Agent_Tools_AI_Evaluation_Results.xlsx"
+    output_file_path = "mbpp-Agent_Tools_AI_Evaluation_Results.xlsx"
     try:
         results_df.to_excel(output_file_path, index=False)
         print(f"Results saved to {output_file_path}")
