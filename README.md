@@ -126,14 +126,15 @@ Evaluation metrics include:
 
     Bugs Detected vs False Alarms
 
-Use:
+## Running TestCopilot
 
-python scripts/run_testcopilot.py
+To run TestCopilot on your dataset, use the following command:
 
-Results are saved in /results/ as .xlsx or .json.
+```bash
+python scripts/run_testcopilot.py --input_dir path/to/your/input --output_dir path/to/save/results
+```
 
-
-📦 Dataset Access
+## 📦 Dataset Access
 
 Due to size limits, datasets and pretrained outputs are stored externally.
 
