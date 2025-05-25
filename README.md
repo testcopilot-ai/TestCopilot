@@ -80,9 +80,3 @@ To run TestCopilot on your dataset, use the following command:
 python scripts/run_testcopilot.py --input_dir path/to/your/input --output_dir path/to/save/results
 ```
 
-## 📦 Dataset Access
-
-Due to size limits, datasets and pre-trained outputs are stored externally.
-
-📥 Download Dataset from Google Drive
-🔗 HumanEval + MBPP TestCopilot Dataset (provide your real link)
