@@ -1,0 +1,8 @@
+openai
+pandas
+coverage
+scikit-learn
+transformers
+sentence-transformers
+radon
+pytest-cov
