@@ -6,23 +6,12 @@ Scenario-enriched LLM-based framework for automatic test case generation, bug de
 
 Scenario-Driven Test Case Generation with Autonomous Agents
 
-🚀 Overview
+# 🚀 Overview
 
 TestCopilot is a multi-agent framework designed to automate software test case generation using Large Language Models (LLMs). It integrates scenario-enriched prompting, bug detection, and coverage analysis to produce high-quality and maintainable test suites. The system is benchmarked on HumanEval and MBPP, demonstrating state-of-the-art performance across correctness, coverage, and maintainability metrics.
 
-🔍 Motivation
 
-Traditional test generation methods often:
-
-    Rely on code alone, lacking functional context
-
-    Miss complex or deep execution paths
-
-    Struggle with bug detection and validation
-
-To address these issues, TestCopilot employs a context-aware, multi-agent prompting system that generates, evaluates, and refines test cases using both functional requirements and code.
-
-📊 Performance Highlights
+# 📊  Performance Highlights
 
 TestCopilot significantly outperforms existing models:
 Metric	TestCopilot
@@ -32,7 +21,7 @@ Function Coverage	89.5%
 Bugs Detected (HumanEval)	179
 False Alarms	0
 🔑 Key Features
-✅ Scenario-Enriched Prompting
+# ✅ Scenario-Enriched Prompting
 
 Integrates functional requirements and user stories to guide LLMs in generating purpose-driven test cases.
 🧠 Multi-Agent Evaluation
@@ -44,7 +33,7 @@ Calculates statement, branch, path, and integration coverage along with maintain
 🔄 Test Repair Feedback Loop
 
 Fixes incomplete or incorrect test cases using iterative improvement agents.
-
+```plaintext
 📦 TestCopilot/
 │
 ├── 📂 dataset/                  # HumanEval / MBPP test scenario datasets
@@ -71,7 +60,7 @@ Fixes incomplete or incorrect test cases using iterative improvement agents.
 ├── .env                        # API Keys (OpenAI,DeepSeek)
 ├── requirements.txt           # Required packages
 ├── README.md                  # Documentation file
-
+```
 
 📌 Requirements
 🖥️ System
