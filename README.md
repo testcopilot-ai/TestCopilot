@@ -20,6 +20,7 @@ TCE (HumanEval)	99.3%
 DDP (HumanEval)	99.7%
 Function Coverage 89.5%
 Bugs Detected (HumanEval) 179
+Maintainability Index 81.31%
 False Alarms 0
 ```
 🔑 Key Features
