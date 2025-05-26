@@ -39,25 +39,21 @@ Fixes incomplete or incorrect test cases using iterative improvement agents.
 📦 TestCopilot/
 │
 ├── 📂 dataset/                  # HumanEval / MBPP test scenario datasets
-│   ├── testcases.xlsx
-│   ├── scenarios.xlsx
-│   ├── code_files/
+│   ├── HumanEval_Scenario_testcases.xlsx
+│   ├── MBPP_Scenario_testcases.xlsx
 │
-├── 📂 agents/                   # Multi-agent modules
-│   ├── Evaluator and fixer.py            # Test evaluation and test fixer agent
+├── 📂 LLM-Based Evaluation/                   # Multi-agent modules
+│   ├── mainchatgpt.py            # Test evaluation and test fixer agent
+│   ├── maindeepseek.py 
 │
-├── 📂 evaluation/              # Evaluation and metric calculation
+├── 📂 Baseline/              # Evaluation and metric calculation
 │   ├── coverage_metrics.py
 │   ├── ddp_tce_metrics.py
 │   ├── maintainability.py
 │
-├── 📂 results/                 # Output logs, Excel summaries, comparison tables
-│   ├── HumanEval_metrics.xlsx
-│   ├── MBPP_metrics.xlsx
-├── 📂 models/                  # LLM invocation and management
-│   ├── openai_agent.py
-│   ├── DeepSeek_agent.py  
-│
+├── 📂 ScenarioGeneration/              # Scenario generation
+│   ├── main.py
+|
 ├── .env                        # API Keys (OpenAI, DeepSeek)
 ├── requirements.txt           # Required packages
 ├── README.md                  # Documentation file
