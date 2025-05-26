@@ -17,10 +17,10 @@ TestCopilot is a multi-agent framework designed to automate software test case g
 TestCopilot significantly outperforms existing models:
 Metric	TestCopilot
 TCE (HumanEval)	99.3%
-DDP (HumanEval)	 99.7%
-Function Coverage	89.5%
-Bugs Detected (HumanEval)	179
-False Alarms	0
+DDP (HumanEval)	99.7%
+Function Coverage 89.5%
+Bugs Detected (HumanEval) 179
+False Alarms 0
 ```
 🔑 Key Features
 # ✅ Scenario-Enriched Prompting
