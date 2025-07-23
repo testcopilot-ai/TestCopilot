@@ -76,6 +76,10 @@ pip install -r requirements.txt
 To run TestCopilot on your dataset, use the following command:
 
 ```bash
-python scripts/run_testcopilot.py --input_dir path/to/your/input --output_dir path/to/save/results
+# Step 1: Generate test scenarios
+python ScenarioGeneration/main.py --input_dir dataset/HumanEval_Scenario_testcases.xlsx --output_dir outputs/scenarios
+
+# Step 2: Evaluate and refine test cases using multi-agent evaluation
+python LLM-Based\ Evaluation/mainchatgpt.py --input_dir outputs/scenarios --output_dir outputs/evaluated_tests
 ```
 
