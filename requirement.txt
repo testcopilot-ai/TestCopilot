@@ -1,8 +1,11 @@
 openai
+numpy
 pandas
-coverage
+scipy
 scikit-learn
 transformers
 sentence-transformers
 radon
+coverage
 pytest-cov
+pynguin
