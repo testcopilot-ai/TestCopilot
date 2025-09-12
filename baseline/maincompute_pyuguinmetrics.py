@@ -31,7 +31,7 @@ from pathlib import Path
 from typing import Dict, List, Tuple, Optional
 
 # -------- Defaults for your project --------
-DEFAULT_PROJECT = r"C:\Users\Furqan\PycharmProjects\scenariogenerated"
+DEFAULT_PROJECT = r"Path-todirectory-scenariogenerated"
 DEFAULT_TESTS_ROOTS = [
     r"path_to_pynguin_generated_testcases\mbpp",
     r"path_to_pynguin_generated_testcases\humaneval",
