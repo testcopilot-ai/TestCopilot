@@ -37,27 +37,39 @@ Calculates statement, branch, path, and integration coverage along with maintain
 
 Fixes incomplete or incorrect test cases using iterative improvement agents.
 ```plaintext
-📦 TestCopilot/
+TestCopilot/
 │
-├── 📂 dataset/                  # HumanEval / MBPP test scenario datasets
-│   ├── HumanEval_Scenario_testcases.xlsx
-│   ├── MBPP_Scenario_testcases.xlsx
+├── 📂 dataset/ # HumanEval / MBPP benchmark datasets
+│ ├── HumanEval_Scenario_testcases.xlsx
+│ ├── MBPP_Scenario_testcases.xlsx
 │
-├── 📂 LLM-Based Evaluation/                   # Multi-agent modules
-│   ├── mainchatgpt.py            # Test evaluation and test fixer agent
-│   ├── maindeepseek.py 
+├── 📂 LLM-Based Evaluation/ # Multi-agent evaluation & robustness
+│ ├── compute_repair_vs_discard.py # Repair vs discard-fail comparison
+│ ├── compute_temp_token.py # Temp/token variation analysis
+│ ├── mainchatgpt.py # Evaluation with ChatGPT
+│ ├── maindeepseek.py # Evaluation with DeepSeek
+│ ├── reasoningandnonreasoning.py # Reasoning vs non-reasoning analysis
+│ ├── semantic_fidelity.py # Semantic fidelity evaluation
+│ ├── stats_robustness.py # Statistical robustness analysis
 │
-├── 📂 Baseline/              # Evaluation and metric calculation
-│   ├── coverage_metrics.py
-│   ├── ddp_tce_metrics.py
-│   ├── maintainability.py
+├── 📂 baseline/ # Baseline evaluations & metrics
+│ ├── main.py
+│ ├── mainaibugy.py
+│ ├── mainbugsapproach.py
+│ ├── maincompute_pyuguinmetrics.py
+│ ├── maincoveragezero.py
+│ ├── mainmaintainabilty.py
+│ ├── mainpyuguin.py
+│ ├── mainpyuguin_mutation.py
+│ ├── mainstatandfunccov.py
 │
-├── 📂 ScenarioGeneration/              # Scenario generation
-│   ├── main.py
+├── 📂 scenariogenerated/ # Scenario generation pipeline
+│ ├── main.py
+│
+├── .env # API keys (OpenAI, DeepSeek)
+├── requirements.txt # Dependencies
+├── README.md # Documentation
 |
-├── .env                        # API Keys (OpenAI, DeepSeek)
-├── requirements.txt           # Required packages
-├── README.md                  # Documentation file
 ```
 
 # 📌 Requirements
@@ -75,11 +87,16 @@ pip install -r requirements.txt
 
 To run TestCopilot on your dataset, use the following command:
 
-```bash
-# Step 1: Generate test scenarios
-python ScenarioGeneration/main.py --input_dir dataset/HumanEval_Scenario_testcases.xlsx --output_dir outputs/scenarios
+```
+Step#1
+python scenariogenerated/main.py \
+  --input dataset/HumanEval_Scenario_testcases.xlsx \
+  --output outputs/scenarios
 
-# Step 2: Evaluate and refine test cases using multi-agent evaluation
-python LLM-Based\ Evaluation/mainchatgpt.py --input_dir outputs/scenarios --output_dir outputs/evaluated_tests
+Step#2
+python "LLM-Based Evaluation/mainchatgpt.py" \
+  --input outputs/scenarios \
+  --output outputs/evaluated_tests
+
 ```
 
