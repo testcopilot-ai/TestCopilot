@@ -6,7 +6,7 @@ Outputs columns:
   dataset, temp, strategy, total_tests, bugs_detected, false_alarms
 
 Usage:
-  python compute_repair_discard.py /path/to/file_or_folder --out out.csv
+  python compute_repair_discard.py /path/to/file_or_directiry --out out.csv
 """
 
 import argparse, re, sys
