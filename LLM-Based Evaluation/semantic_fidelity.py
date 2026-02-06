@@ -13,6 +13,8 @@ Input CSV can be in either format:
    e.g., HumanEval, Temp_0, 38, r1, retained
          HumanEval, Temp_0, 38, r2, minor_drift
 
+3) Leetcode         
+
 Usage:
     python semantic_fidelity_temp0.py --csv annotations.csv \
         --excluded-mbpp 151 --excluded-humaneval 163
