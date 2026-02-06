@@ -1,6 +1,6 @@
 # Replication package for paper "Scenario-Driven Test Case Generation withAutonomous Agents"
 
-![Architecture](TestCopilot.png)
+![Architecture](TestCopilot.PNG)
 # TestCopilot
 Scenario-enriched LLM-based framework for automatic test case generation, bug detection, and code evaluation.
 
