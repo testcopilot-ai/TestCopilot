@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Compute impact of Temperature and Max Token Variation on Pass Rates.
+Compute the impact of Temperature and Max Token Variation on Pass Rates.
 
 - Loads results for HumanEval and MBPP across Temp_0..Temp_3.
 - Computes mean pass rate & std dev per config.
