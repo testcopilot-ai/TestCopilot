@@ -18,7 +18,13 @@ FILE_PATTERNS = {
         "Mbpp_Tools_AI_Evaluation_Results_temp_1.xlsx",        # Temp_1
         "Mbpp_Tools_AI_Evaluation_Results_temp_2.xlsx",        # Temp_2
         "Mbpp_Tools_AI_Evaluation_Results_temp3.xlsx",         # Temp_3
-    ]
+    ],
+    "LeetCode": [
+        "Leetcode_Tools_AI_Evaluation_Results1.xlsx",              # Temp_0
+        "LeetCode_Tools_AI_Evaluation_Results_temp_1.xlsx",        # Temp_1
+        "LeetCode_Tools_AI_Evaluation_Results_temp_2.xlsx",        # Temp_2
+        "LeetCode_Tools_AI_Evaluation_Results_temp3.xlsx",         # Temp_3
+    ],
 }
 TEMP_LABELS = ["Temp_0", "Temp_1", "Temp_2", "Temp_3"]
 
