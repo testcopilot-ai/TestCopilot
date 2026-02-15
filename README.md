@@ -111,23 +111,7 @@ TestCopilot/
 🖥️ System
 Python 3.9+
 
-Internet access for LLM API calls
 
-Install dependencies with:
-
-pip install -r requirements.txt
-Running TestCopilot
-To run TestCopilot on your dataset:
-
-Step #1
-python scenariogenerated/main.py \
-  --input dataset/HumanEval_Scenario_testcases.xlsx \
-  --output outputs/scenarios
-
-Step #2
-python "LLM-Based Evaluation/mainchatgpt.py" \
-  --input outputs/scenarios \
-  --output outputs/evaluated_tests
 
 🔑 API Configuration
 
