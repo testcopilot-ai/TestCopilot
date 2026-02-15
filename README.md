@@ -1,10 +1,3 @@
-Perfect — you want the **same style and structure as your original version**, but polished, consistent, and academically clean — while keeping that GitHub-friendly format.
-
-Below is your **complete refined README.md**, written in the same format and tone as your example.
-
-You can copy–paste directly.
-
----
 
 ````md
 # Replication Package for Paper  
