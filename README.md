@@ -128,3 +128,50 @@ Step #2
 python "LLM-Based Evaluation/mainchatgpt.py" \
   --input outputs/scenarios \
   --output outputs/evaluated_tests
+
+🔑 API Configuration
+
+Set your API key before running evaluation.
+
+Linux / macOS
+export OPENAI_API_KEY=your_key_here
+
+Windows
+setx OPENAI_API_KEY "your_key_here"
+
+▶️ Running TestCopilot
+
+To run TestCopilot on your dataset:
+
+Step #1 – Scenario Generation
+
+python scenariogenerated/main.py \
+  --input dataset/HumanEval_Scenario_testcases.xlsx \
+  --output outputs/scenarios
+
+
+Step #2 – Multi-Agent Evaluation (GPT-4 backend)
+
+python "LLM-Based Evaluation/mainchatgpt.py" \
+  --input outputs/scenarios \
+  --output outputs/evaluated_tests
+
+
+For DeepSeek backend:
+
+python "LLM-Based Evaluation/maindeepseek.py" \
+  --input outputs/scenarios \
+  --output outputs/evaluated_tests
+
+🔬 Reproducing Paper Analyses
+Repair vs Discard-Fail
+python "LLM-Based Evaluation/compute_repair_vs_discard.py"
+
+Temperature / Token Sensitivity
+python "LLM-Based Evaluation/compute_temp_token.py"
+
+Reasoning vs Non-Reasoning Study
+python "LLM-Based Evaluation/reasoningandnonreasoning.py"
+
+Statistical Robustness
+python "LLM-Based Evaluation/stats_robustness.py"
