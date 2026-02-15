@@ -1,102 +1,108 @@
-# Replication package for paper "Scenario-Driven Test Case Generation withAutonomous Agents"
+# TESTCOPILOT — Scenario-Driven Test Case Generation with Autonomous Agents
 
 ![Architecture](TestCopilot.PNG)
-# TestCopilot
-Scenario-enriched LLM-based framework for automatic test case generation, bug detection, and code evaluation.
 
-Scenario-Driven Test Case Generation with Autonomous Agents
+**TESTCOPILOT** is a scenario-driven, multi-agent framework for generating **semantically accurate** and **coverage-effective** Python unit tests from **functional requirements** and **method signatures**.  
+Instead of one-shot requirement→test translation, TESTCOPILOT **first synthesizes explicit execution scenarios**, then instantiates them into tests, and finally applies an **agent-based validation + repair loop** to eliminate invalid tests and reduce oracle errors.
 
-# 🚀 Overview
+This repository is the **replication package** for the paper:
 
-TestCopilot is a multi-agent framework designed to automate software test case generation using Large Language Models (LLMs). It integrates scenario-enriched prompting, bug detection, and coverage analysis to produce high-quality and maintainable test suites. The system is benchmarked on HumanEval and MBPP, demonstrating state-of-the-art performance across correctness, coverage, and maintainability metrics.
+> **Scenario-Driven Test Case Generation with Autonomous Agents**
 
+---
 
-# 📊  Performance Highlights
+## ✨ Key Idea (What’s different)
+TESTCOPILOT introduces a **Scenario-driven Contextual Generation Framework (S-CGF)** and a **Scenario-Based Test Case Generation (STCG)** pipeline:
 
-```plaintext
-TestCopilot significantly outperforms existing models:
-Metric	TestCopilot
-TCE (HumanEval)	99.3%
-DDP (HumanEval)	99.7%
-Function Coverage 89.5%
-Bugs Detected (HumanEval) 179
-Maintainability Index 81.31%
-False Alarms 0
-```
-🔑 Key Features
-# ✅ Scenario-Enriched Prompting
+1. **Zero-shot initial tests** from (Requirement + Signature)
+2. **Rank & select** candidates using mutation-based effectiveness + coverage (TCE, FAR, etc.)
+3. **S-CGF contextual synthesis** (no external RAG corpus): generate and filter analogous scenarios to guide reasoning
+4. **Scenario abstraction**: convert requirements into explicit behavioral scenarios (inputs → expected outputs)
+5. **STCG instantiation**: generate executable `pytest` tests from scenarios
+6. **Autonomous agent loop (Informant + Fixer)**: validate and minimally repair failing/invalid tests (max retries = 3)
 
-Integrates functional requirements and user stories to guide LLMs in generating purpose-driven test cases.
-🧠 Multi-Agent Evaluation
+---
 
-Includes separate agents for generation, bug detection, test refinement, and repair validation.
-📈 Deep Coverage Analysis
+## 📊 Reported Performance (Paper Results)
 
-Calculates statement, branch, path, and integration coverage along with maintainability scores.
-🔄 Test Repair Feedback Loop
+### HumanEval
+- **TCE:** 99.3%
+- **Coverage:** 99.5%
+- **Bugs detected:** 179
+- **False alarms:** 0
+- **Maintainability Index:** 71.30%
 
-Fixes incomplete or incorrect test cases using iterative improvement agents.
+### MBPP
+- **TCE:** 99.3%
+- **Coverage:** 99.5%
+- **Bugs detected:** 157
+- **False alarms:** 0
+- **Maintainability Index:** 83.31%
+
+### LeetCode
+- **TCE:** 64.8%
+- **Coverage:** 92.7%
+- **Bugs detected:** 178
+- **False alarms:** 43
+- **Maintainability Index:** 47.5%
+
+> Total evaluation scale: **58,912 test cases** across HumanEval, MBPP, and LeetCode.
+
+---
+
+## 🧩 Framework Components
+
+### ✅ Scenario-Enriched Prompting
+Transforms abstract requirements into **concrete execution scenarios** (precondition → action → expected outcome), improving edge-case reasoning and oracle fidelity.
+
+### 🧠 Multi-Agent Evaluation (Informant + Fixer)
+- **Informant Agent**: semantic gatekeeper (rejects invalid tests: signature mismatch, non-executable, vacuous asserts, requirement conflicts, non-determinism, etc.)
+- **Fixer Agent**: minimal repair of tests without modifying the implementation under test  
+- **Bounded retries**: max 3 repair attempts per test
+
+### 📈 Coverage + Mutation-Based Evaluation
+Metrics include:
+- Test Case Effectiveness (TCE)
+- False Alarm Rate (FAR)
+- Function / Statement / Branch / Path coverage
+- Maintainability Index (radon)
+
+Tooling: `pytest`, `pytest-cov` / `coverage.py`, `mutpy`, `radon`.
+
+---
+
+## 📦 Repository Structure
+
 ```plaintext
 TestCopilot/
 │
-├── 📂 dataset/ # HumanEval / MBPP benchmark datasets
-│ ├── HumanEval_Scenario_testcases.xlsx
-│ ├── MBPP_Scenario_testcases.xlsx
+├── dataset/                         # HumanEval / MBPP scenario datasets
+│   ├── HumanEval_Scenario_testcases.xlsx
+│   ├── MBPP_Scenario_testcases.xlsx
 │
-├── 📂 LLM-Based Evaluation/ # Multi-agent evaluation & robustness
-│ ├── compute_repair_vs_discard.py # Repair vs discard-fail comparison
-│ ├── compute_temp_token.py # Temp/token variation analysis
-│ ├── mainchatgpt.py # Evaluation with ChatGPT
-│ ├── maindeepseek.py # Evaluation with DeepSeek
-│ ├── reasoningandnonreasoning.py # Reasoning vs non-reasoning analysis
-│ ├── semantic_fidelity.py # Semantic fidelity evaluation
-│ ├── stats_robustness.py # Statistical robustness analysis
+├── scenariogenerated/               # Scenario generation (S-CGF + scenario abstraction)
+│   ├── main.py
 │
-├── 📂 baseline/ # Baseline evaluations & metrics
-│ ├── main.py
-│ ├── mainaibugy.py
-│ ├── mainbugsapproach.py
-│ ├── maincompute_pyuguinmetrics.py
-│ ├── maincoveragezero.py
-│ ├── mainmaintainabilty.py
-│ ├── mainpyuguin.py
-│ ├── mainpyuguin_mutation.py
-│ ├── mainstatandfunccov.py
+├── LLM-Based Evaluation/            # LLM + multi-agent evaluation & robustness
+│   ├── mainchatgpt.py               # Run TESTCOPILOT with GPT-4 Turbo backend
+│   ├── maindeepseek.py              # Run TESTCOPILOT with DeepSeek backend
+│   ├── compute_repair_vs_discard.py # Ablation: Repair vs Discard-Fail
+│   ├── compute_temp_token.py        # Temperature/token analysis
+│   ├── reasoningandnonreasoning.py  # CoT reasoning ON/OFF analysis (Rationalization Trap)
+│   ├── semantic_fidelity.py         # Qualitative semantic fidelity evaluation
+│   ├── stats_robustness.py          # Bootstrap CI + statistical tests
 │
-├── 📂 scenariogenerated/ # Scenario generation pipeline
-│ ├── main.py
+├── baseline/                        # Baselines & metric computation
+│   ├── main.py
+│   ├── mainaibugy.py
+│   ├── mainbugsapproach.py
+│   ├── maincompute_pyuguinmetrics.py
+│   ├── maincoveragezero.py
+│   ├── mainmaintainabilty.py
+│   ├── mainpyuguin.py
+│   ├── mainpyuguin_mutation.py
+│   ├── mainstatandfunccov.py
 │
-├── .env # API keys (OpenAI, DeepSeek)
-├── requirements.txt # Dependencies
-├── README.md # Documentation
-|
-```
-
-# 📌 Requirements
-🖥️ System
-
-    Python 3.9+
-
-    Internet access for LLM API calls
-
-Install them with:
-
-pip install -r requirements.txt
-
-## Running TestCopilot
-
-To run TestCopilot on your dataset, use the following command:
-
-```
-Step#1
-python scenariogenerated/main.py \
-  --input dataset/HumanEval_Scenario_testcases.xlsx \
-  --output outputs/scenarios
-
-Step#2
-python "LLM-Based Evaluation/mainchatgpt.py" \
-  --input outputs/scenarios \
-  --output outputs/evaluated_tests
-
-```
-
+├── requirements.txt
+├── .env                             # API keys (OpenAI / DeepSeek)
+└── README.md
