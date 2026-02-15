@@ -4,7 +4,7 @@
 ![Architecture](TestCopilot.PNG)
 
 # TestCopilot  
-Scenario-enriched LLM-based framework for automatic test case generation, bug detection, and code evaluation.
+Scenario-enriched LLM-based framework for automatic test case generation, bug detection, and test cases evaluation.
 
 Scenario-Driven Test Case Generation with Autonomous Agents
 
