@@ -1,4 +1,3 @@
-````
 # Replication package for paper  
 # "Scenario-Driven Test Case Generation with Autonomous Agents"
 
@@ -43,43 +42,39 @@ Coverage (LeetCode)                     92.7%
 Bugs Detected (LeetCode)                178
 False Alarms (LeetCode)                 43
 Maintainability Index (LeetCode)        47.5%
-````
-
----
-
-# 🔑 Key Features
-
-## ✅ Scenario-Enriched Prompting
-
+🔑 Key Features
+✅ Scenario-Enriched Prompting
 Integrates functional requirements and structured behavioral scenarios to guide LLMs in generating purpose-driven and semantically aligned test cases.
 
-## 🧠 Multi-Agent Evaluation
-
+🧠 Multi-Agent Evaluation
 Includes separate agents for:
 
-* Test generation
-* Structural validation (Informant)
-* Test refinement and repair (Fixer)
-* Robustness and effectiveness evaluation
+Test generation
 
-## 📈 Deep Coverage Analysis
+Structural validation (Informant)
 
+Test refinement and repair (Fixer)
+
+Robustness and effectiveness evaluation
+
+📈 Deep Coverage Analysis
 Calculates:
 
-* Test Case Effectiveness (TCE)
-* Function Coverage
-* Statement Coverage
-* Branch Coverage
-* Path Coverage
-* Maintainability Index (radon)
+Test Case Effectiveness (TCE)
 
-## 🔄 Test Repair Feedback Loop
+Function Coverage
 
+Statement Coverage
+
+Branch Coverage
+
+Path Coverage
+
+Maintainability Index (radon)
+
+🔄 Test Repair Feedback Loop
 Fixes incomplete or inconsistent test cases using bounded iterative repair (maximum 3 retries), without exposing reference implementations.
 
----
-
-```plaintext
 TestCopilot/
 │
 ├── 📂 dataset/                         # HumanEval / MBPP benchmark datasets
@@ -112,30 +107,18 @@ TestCopilot/
 ├── .env                                # API keys (OpenAI, DeepSeek)
 ├── requirements.txt                    # Dependencies
 └── README.md                           # Documentation
-```
+📌 Requirements
+🖥️ System
+Python 3.9+
 
----
-
-# 📌 Requirements
-
-## 🖥️ System
-
-* Python 3.9+
-* Internet access for LLM API calls
+Internet access for LLM API calls
 
 Install dependencies with:
 
-```bash
 pip install -r requirements.txt
-```
-
----
-
-## Running TestCopilot
-
+Running TestCopilot
 To run TestCopilot on your dataset:
 
-```
 Step #1
 python scenariogenerated/main.py \
   --input dataset/HumanEval_Scenario_testcases.xlsx \
@@ -145,10 +128,3 @@ Step #2
 python "LLM-Based Evaluation/mainchatgpt.py" \
   --input outputs/scenarios \
   --output outputs/evaluated_tests
-```
-
-```
-
-
-If you want it even shorter or more minimal, tell me and I’ll compress it further.
-```
