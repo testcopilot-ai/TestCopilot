@@ -1,0 +1,14 @@
+{
+  "task_id": "django__django-11133",
+  "project": "django/django",
+  "source": "SWE-bench",
+  "version": "3.0",
+  "base_commit": "879cc3da6249e920b8d54518a0ae06de835d7373",
+  "env_name": "setup_django__django__3.0",
+  "repo_path": "/home/furqan/ScenarioGenerated/SWE-bench/testbed/django__django/setup_django__django__3.0",
+  "setup_map": "/home/furqan/ScenarioGenerated/SWE-bench/setup_result/setup_map.json",
+  "tasks_map": "/home/furqan/ScenarioGenerated/SWE-bench/setup_result/tasks_map.json",
+  "fixed_code_allowed": false,
+  "developer_test_allowed": false,
+  "input_type": "real_project_issue"
+}
