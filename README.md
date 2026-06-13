@@ -107,10 +107,10 @@ TestCopilot/
 ├── .env                                # API keys (OpenAI, DeepSeek)
 ├── requirements.txt                    # Dependencies
 └── README.md                           # Documentation
-├── docs/
+├── 📂 Real_project_validation/
+|   ├──Docs
 │   ├── REAL_PROJECT_METHODOLOGY.md
 │   └── README_REAL_PROJECT_VALIDATION.md
-├── real_project_validation/
 │   ├── django_11133/
 │   │   ├── generated_test.py
 │   │   ├── buggy_validation_summary.json
