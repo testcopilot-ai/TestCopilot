@@ -1,0 +1,39 @@
+Scenarios:
+1. HttpResponse with memoryview content should return the underlying bytes when accessing .content, but currently returns a string representation of the memoryview object.
+2. HttpResponse should handle memoryview objects the same way it handles bytes objects, since memoryview supports the buffer protocol and can be converted to bytes.
+
+Testcases:
+```python
+import sys
+from django.http import HttpResponse
+from django.test import SimpleTestCase
+
+class HttpResponseMemoryViewTest(SimpleTestCase):
+    def test_memoryview_content(self):
+        """HttpResponse should handle memoryview objects correctly."""
+        data = memoryview(b"My Content")
+        response = HttpResponse(data)
+        self.assertEqual(response.content, b"My Content")
+    
+    def test_memoryview_content_type(self):
+        """HttpResponse with memoryview should have correct content type."""
+        data = memoryview(b"test data")
+        response = HttpResponse(data)
+        self.assertEqual(response['Content-Type'], 'text/html; charset=utf-8')
+    
+    def test_memoryview_write(self):
+        """HttpResponse.write should handle memoryview objects."""
+        response = HttpResponse()
+        response.write(memoryview(b"written content"))
+        self.assertEqual(response.content, b"written content")
+    
+    def test_memoryview_iteration(self):
+        """HttpResponse should iterate over memoryview content correctly."""
+        data = memoryview(b"iterable content")
+        response = HttpResponse(data)
+        result = b''.join(response)
+        self.assertEqual(result, b"iterable content")
+```
+
+Suggested location:
+tests/httpwrap/tests.py
