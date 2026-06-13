@@ -1,0 +1,10 @@
+{
+  "task_id": "django__django-11133",
+  "project": "Django",
+  "issue_behavior": "HttpResponse should correctly handle memoryview content as bytes.",
+  "generated_tests": 5,
+  "buggy_version_result": "FAIL",
+  "fixed_version_result": "PASS",
+  "classification": "Bug-revealing regression test",
+  "methodology": "Scenario generation -> scenario-based test generation -> Informant validation -> Fixer repair -> buggy/fixed execution"
+}
