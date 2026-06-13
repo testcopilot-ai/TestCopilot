@@ -290,19 +290,9 @@ Fixed version: PASS
 
 This result directly supports the claim that TestCopilot can generate useful regression tests for a real multi-file open-source project.
 
-## 12. How This Fits the Paper Methodology
 
-This case study extends the original benchmark evaluation by adding a real-project validation stage. The benchmark evaluation remains the main quantitative evaluation, while the Django/SWE-bench case study strengthens external validity.
 
-The methodology can be described as follows:
-
-> For real-project validation, we reused the SWE-bench/AutoCodeRover infrastructure only to obtain executable project instances. Unlike patch-generation systems, TestCopilot generates regression tests. Given a SWE-bench issue description and buggy-version context, TestCopilot first generates requirement-aligned scenarios. These scenarios are then used to generate executable Django regression tests. The Informant Agent checks alignment with the issue requirement and the testing methodology. If the generated test fails this check, the Fixer Agent repairs the test using the Informant feedback. The final generated test is executed on the buggy version and then on the fixed version. A generated test is considered bug-revealing only if it fails on the buggy version and passes on the fixed version.
-
-## 13. Reviewer Response Text
-
-> We thank the reviewer for raising this concern. In the revised manuscript, we added a real-project validation study using a Django task from SWE-bench. Unlike the original benchmark tasks, this case involves a mature open-source project with multiple files, dependencies, and framework-level behavior. TestCopilot generated regression tests from the issue description and buggy-version context only, without access to the fixed code or developer-written regression tests. The generated tests failed on the buggy Django version and passed after applying the official fix, providing additional evidence that the proposed methodology generalizes beyond single-function natural-language benchmark tasks.
-
-## 14. Security and Reproducibility Notes
+## 12. Security and Reproducibility Notes
 
 1. Do not commit API keys to the repository.
 2. Use environment variables such as `DEEPSEEK_API_KEY`.
