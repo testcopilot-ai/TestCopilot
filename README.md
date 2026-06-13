@@ -107,6 +107,21 @@ TestCopilot/
 ├── .env                                # API keys (OpenAI, DeepSeek)
 ├── requirements.txt                    # Dependencies
 └── README.md                           # Documentation
+├── docs/
+│   ├── REAL_PROJECT_METHODOLOGY.md
+│   └── README_REAL_PROJECT_VALIDATION.md
+├── real_project_validation/
+│   ├── django_11133/
+│   │   ├── generated_test.py
+│   │   ├── buggy_validation_summary.json
+│   │   ├── fixed_validation_summary.json
+│   │   └── README.md
+│   └── scripts/
+│       ├── generate_swebench_scenarios_agents.py
+│       ├── fix_validate_swebench_django_tests.py
+│       └── validate_swebench_fixed_version.py
+└── .env.example
+
 📌 Requirements
 🖥️ System
 Python 3.9+
