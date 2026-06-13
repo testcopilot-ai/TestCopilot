@@ -1,0 +1,8 @@
+{
+  "task_id": "django__django-11133",
+  "repo_path": "/home/furqan/ScenarioGenerated/SWE-bench/testbed/django__django/setup_django__django__3.0",
+  "env_name": "setup_django__django__3.0",
+  "final_status": "FAIL_ON_BUGGY",
+  "final_test": "/home/furqan/ScenarioGenerated/testcopilot_real_project_output/django_11133_validation/fixed_test_final.py",
+  "history": "/home/furqan/ScenarioGenerated/testcopilot_real_project_output/django_11133_validation/validation_history.json"
+}

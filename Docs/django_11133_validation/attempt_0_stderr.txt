@@ -1,0 +1,59 @@
+test_memoryview_content_multiple_access (testcopilot_generated.test_generated_django__django_11133.HttpResponseMemoryviewTest) ... FAIL
+test_memoryview_content_returns_bytes (testcopilot_generated.test_generated_django__django_11133.HttpResponseMemoryviewTest) ... FAIL
+test_memoryview_content_setter (testcopilot_generated.test_generated_django__django_11133.HttpResponseMemoryviewTest) ... FAIL
+test_memoryview_empty_bytes (testcopilot_generated.test_generated_django__django_11133.HttpResponseMemoryviewTest) ... FAIL
+test_memoryview_iteration (testcopilot_generated.test_generated_django__django_11133.HttpResponseMemoryviewTest) ... FAIL
+
+======================================================================
+FAIL: test_memoryview_content_multiple_access (testcopilot_generated.test_generated_django__django_11133.HttpResponseMemoryviewTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/furqan/ScenarioGenerated/SWE-bench/testbed/django__django/setup_django__django__3.0/tests/testcopilot_generated/test_generated_django__django_11133.py", line 19, in test_memoryview_content_multiple_access
+    self.assertEqual(first_access, b"Test Data")
+AssertionError: b'<memory at 0x713c10eaedc8>' != b'Test Data'
+
+======================================================================
+FAIL: test_memoryview_content_returns_bytes (testcopilot_generated.test_generated_django__django_11133.HttpResponseMemoryviewTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/furqan/ScenarioGenerated/SWE-bench/testbed/django__django/setup_django__django__3.0/tests/testcopilot_generated/test_generated_django__django_11133.py", line 8, in test_memoryview_content_returns_bytes
+    self.assertEqual(response.content, b"My Content")
+AssertionError: b'<memory at 0x713c10eaedc8>' != b'My Content'
+
+======================================================================
+FAIL: test_memoryview_content_setter (testcopilot_generated.test_generated_django__django_11133.HttpResponseMemoryviewTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/furqan/ScenarioGenerated/SWE-bench/testbed/django__django/setup_django__django__3.0/tests/testcopilot_generated/test_generated_django__django_11133.py", line 24, in test_memoryview_content_setter
+    self.assertEqual(response.content, b"Updated")
+AssertionError: b'<memory at 0x713c10eaedc8>' != b'Updated'
+
+======================================================================
+FAIL: test_memoryview_empty_bytes (testcopilot_generated.test_generated_django__django_11133.HttpResponseMemoryviewTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/furqan/ScenarioGenerated/SWE-bench/testbed/django__django/setup_django__django__3.0/tests/testcopilot_generated/test_generated_django__django_11133.py", line 12, in test_memoryview_empty_bytes
+    self.assertEqual(response.content, b"")
+AssertionError: b'<memory at 0x713c10eaedc8>' != b''
+
+======================================================================
+FAIL: test_memoryview_iteration (testcopilot_generated.test_generated_django__django_11133.HttpResponseMemoryviewTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/furqan/ScenarioGenerated/SWE-bench/testbed/django__django/setup_django__django__3.0/tests/testcopilot_generated/test_generated_django__django_11133.py", line 29, in test_memoryview_iteration
+    self.assertEqual(chunks, [b"Hello World"])
+AssertionError: Lists differ: [b'<memory at 0x713c10eaedc8>'] != [b'Hello World']
+
+First differing element 0:
+b'<memory at 0x713c10eaedc8>'
+b'Hello World'
+
+- [b'<memory at 0x713c10eaedc8>']
++ [b'Hello World']
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.001s
+
+FAILED (failures=5)
+
+ERROR conda.cli.main_run:execute(125): `conda run python tests/runtests.py testcopilot_generated -v 2` failed. (See above for error)
