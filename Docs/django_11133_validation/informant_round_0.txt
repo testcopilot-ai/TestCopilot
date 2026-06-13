@@ -1,5 +1,0 @@
-{
-  "verdict": "PASS",
-  "feedback": "All generated tests align with the issue, are derived from scenarios, use meaningful assertions, follow Django SimpleTestCase methodology, and are syntactically correct.",
-  "violations": []
-}
