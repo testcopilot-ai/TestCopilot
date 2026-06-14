@@ -1,2 +1,0 @@
-Previous HEAD position was f39634ff22 Refs #32390 -- Bumped required cx_Oracle to 7.0.
-Switched to branch 'pr_13964'
