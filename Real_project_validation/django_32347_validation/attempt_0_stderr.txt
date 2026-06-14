@@ -1,0 +1,232 @@
+Creating test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...
+test_invalid_choice_hyphenated_value (testcopilot_generated.test_generated_django_32347.Ticket32347RegressionTests) ... FAIL
+test_invalid_choice_long_value (testcopilot_generated.test_generated_django_32347.Ticket32347RegressionTests) ... FAIL
+test_invalid_choice_mixed_case_value (testcopilot_generated.test_generated_django_32347.Ticket32347RegressionTests) ... FAIL
+test_invalid_choice_number_like_string (testcopilot_generated.test_generated_django_32347.Ticket32347RegressionTests) ... FAIL
+test_invalid_choice_symbol_value (testcopilot_generated.test_generated_django_32347.Ticket32347RegressionTests) ... FAIL
+test_invalid_choice_text (testcopilot_generated.test_generated_django_32347.Ticket32347RegressionTests) ... FAIL
+
+======================================================================
+FAIL: test_invalid_choice_hyphenated_value (testcopilot_generated.test_generated_django_32347.Ticket32347RegressionTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/django/db/models/fields/__init__.py", line 1823, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: 'missing-choice'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/django/forms/models.py", line 1285, in to_python
+    value = self.queryset.get(**{key: value})
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/django/db/models/query.py", line 424, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/django/db/models/query.py", line 939, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/django/db/models/query.py", line 959, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+ValueError: Field 'id' expected a number but got 'missing-choice'.
+
+During handling of the above exception, another exception occurred:
+
+django.core.exceptions.ValidationError: ['"%(value)s" is not one of the available choices.']
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/tests/testcopilot_generated/test_generated_django_32347.py", line 56, in test_invalid_choice_hyphenated_value
+    self.assert_invalid_choice_message_contains_value("missing-choice")
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/tests/testcopilot_generated/test_generated_django_32347.py", line 45, in assert_invalid_choice_message_contains_value
+    field.clean(submitted_value)
+  File "/home/furqan/miniconda3/envs/setup_django_32347/lib/python3.8/contextlib.py", line 131, in __exit__
+    self.gen.throw(type, value, traceback)
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/django/test/testcases.py", line 693, in _assert_raises_or_warns_cm
+    self.assertIn(expected_message, str(getattr(cm, cm_attr)))
+AssertionError: '"missing-choice" is not one of the available choices.' not found in '[\'"%(value)s" is not one of the available choices.\']'
+
+======================================================================
+FAIL: test_invalid_choice_long_value (testcopilot_generated.test_generated_django_32347.Ticket32347RegressionTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/django/db/models/fields/__init__.py", line 1823, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: 'ticket32347-invalid-value'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/django/forms/models.py", line 1285, in to_python
+    value = self.queryset.get(**{key: value})
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/django/db/models/query.py", line 424, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/django/db/models/query.py", line 939, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/django/db/models/query.py", line 959, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+ValueError: Field 'id' expected a number but got 'ticket32347-invalid-value'.
+
+During handling of the above exception, another exception occurred:
+
+django.core.exceptions.ValidationError: ['"%(value)s" is not one of the available choices.']
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/tests/testcopilot_generated/test_generated_django_32347.py", line 65, in test_invalid_choice_long_value
+    self.assert_invalid_choice_message_contains_value("ticket32347-invalid-value")
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/tests/testcopilot_generated/test_generated_django_32347.py", line 45, in assert_invalid_choice_message_contains_value
+    field.clean(submitted_value)
+  File "/home/furqan/miniconda3/envs/setup_django_32347/lib/python3.8/contextlib.py", line 131, in __exit__
+    self.gen.throw(type, value, traceback)
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/django/test/testcases.py", line 693, in _assert_raises_or_warns_cm
+    self.assertIn(expected_message, str(getattr(cm, cm_attr)))
+AssertionError: '"ticket32347-invalid-value" is not one of the available choices.' not found in '[\'"%(value)s" is not one of the available choices.\']'
+
+======================================================================
+FAIL: test_invalid_choice_mixed_case_value (testcopilot_generated.test_generated_django_32347.Ticket32347RegressionTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/django/db/models/fields/__init__.py", line 1823, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: 'MissingChoice'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/django/forms/models.py", line 1285, in to_python
+    value = self.queryset.get(**{key: value})
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/django/db/models/query.py", line 424, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/django/db/models/query.py", line 939, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/django/db/models/query.py", line 959, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+ValueError: Field 'id' expected a number but got 'MissingChoice'.
+
+During handling of the above exception, another exception occurred:
+
+django.core.exceptions.ValidationError: ['"%(value)s" is not one of the available choices.']
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/tests/testcopilot_generated/test_generated_django_32347.py", line 59, in test_invalid_choice_mixed_case_value
+    self.assert_invalid_choice_message_contains_value("MissingChoice")
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/tests/testcopilot_generated/test_generated_django_32347.py", line 45, in assert_invalid_choice_message_contains_value
+    field.clean(submitted_value)
+  File "/home/furqan/miniconda3/envs/setup_django_32347/lib/python3.8/contextlib.py", line 131, in __exit__
+    self.gen.throw(type, value, traceback)
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/django/test/testcases.py", line 693, in _assert_raises_or_warns_cm
+    self.assertIn(expected_message, str(getattr(cm, cm_attr)))
+AssertionError: '"MissingChoice" is not one of the available choices.' not found in '[\'"%(value)s" is not one of the available choices.\']'
+
+======================================================================
+FAIL: test_invalid_choice_number_like_string (testcopilot_generated.test_generated_django_32347.Ticket32347RegressionTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/django/forms/models.py", line 1285, in to_python
+    value = self.queryset.get(**{key: value})
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/django/db/models/query.py", line 435, in get
+    raise self.model.DoesNotExist(
+testcopilot_generated.test_generated_django_32347.ChoiceModel32347.DoesNotExist: ChoiceModel32347 matching query does not exist.
+
+During handling of the above exception, another exception occurred:
+
+django.core.exceptions.ValidationError: ['"%(value)s" is not one of the available choices.']
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/tests/testcopilot_generated/test_generated_django_32347.py", line 53, in test_invalid_choice_number_like_string
+    self.assert_invalid_choice_message_contains_value("12345")
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/tests/testcopilot_generated/test_generated_django_32347.py", line 45, in assert_invalid_choice_message_contains_value
+    field.clean(submitted_value)
+  File "/home/furqan/miniconda3/envs/setup_django_32347/lib/python3.8/contextlib.py", line 131, in __exit__
+    self.gen.throw(type, value, traceback)
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/django/test/testcases.py", line 693, in _assert_raises_or_warns_cm
+    self.assertIn(expected_message, str(getattr(cm, cm_attr)))
+AssertionError: '"12345" is not one of the available choices.' not found in '[\'"%(value)s" is not one of the available choices.\']'
+
+======================================================================
+FAIL: test_invalid_choice_symbol_value (testcopilot_generated.test_generated_django_32347.Ticket32347RegressionTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/django/db/models/fields/__init__.py", line 1823, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: 'bad.choice'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/django/forms/models.py", line 1285, in to_python
+    value = self.queryset.get(**{key: value})
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/django/db/models/query.py", line 424, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/django/db/models/query.py", line 939, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/django/db/models/query.py", line 959, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+ValueError: Field 'id' expected a number but got 'bad.choice'.
+
+During handling of the above exception, another exception occurred:
+
+django.core.exceptions.ValidationError: ['"%(value)s" is not one of the available choices.']
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/tests/testcopilot_generated/test_generated_django_32347.py", line 62, in test_invalid_choice_symbol_value
+    self.assert_invalid_choice_message_contains_value("bad.choice")
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/tests/testcopilot_generated/test_generated_django_32347.py", line 45, in assert_invalid_choice_message_contains_value
+    field.clean(submitted_value)
+  File "/home/furqan/miniconda3/envs/setup_django_32347/lib/python3.8/contextlib.py", line 131, in __exit__
+    self.gen.throw(type, value, traceback)
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/django/test/testcases.py", line 693, in _assert_raises_or_warns_cm
+    self.assertIn(expected_message, str(getattr(cm, cm_attr)))
+AssertionError: '"bad.choice" is not one of the available choices.' not found in '[\'"%(value)s" is not one of the available choices.\']'
+
+======================================================================
+FAIL: test_invalid_choice_text (testcopilot_generated.test_generated_django_32347.Ticket32347RegressionTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/django/db/models/fields/__init__.py", line 1823, in get_prep_value
+    return int(value)
+ValueError: invalid literal for int() with base 10: 'invalid'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/django/forms/models.py", line 1285, in to_python
+    value = self.queryset.get(**{key: value})
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/django/db/models/query.py", line 424, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/django/db/models/query.py", line 939, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/django/db/models/query.py", line 959, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+ValueError: Field 'id' expected a number but got 'invalid'.
+
+During handling of the above exception, another exception occurred:
+
+django.core.exceptions.ValidationError: ['"%(value)s" is not one of the available choices.']
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/tests/testcopilot_generated/test_generated_django_32347.py", line 50, in test_invalid_choice_text
+    self.assert_invalid_choice_message_contains_value("invalid")
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/tests/testcopilot_generated/test_generated_django_32347.py", line 45, in assert_invalid_choice_message_contains_value
+    field.clean(submitted_value)
+  File "/home/furqan/miniconda3/envs/setup_django_32347/lib/python3.8/contextlib.py", line 131, in __exit__
+    self.gen.throw(type, value, traceback)
+  File "/home/furqan/ScenarioGenerated/real_project_repos/django_32347/django/test/testcases.py", line 693, in _assert_raises_or_warns_cm
+    self.assertIn(expected_message, str(getattr(cm, cm_attr)))
+AssertionError: '"invalid" is not one of the available choices.' not found in '[\'"%(value)s" is not one of the available choices.\']'
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.021s
+
+FAILED (failures=6)
+Destroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...
+
+ERROR conda.cli.main_run:execute(125): `conda run python tests/runtests.py testcopilot_generated -v 2` failed. (See above for error)
