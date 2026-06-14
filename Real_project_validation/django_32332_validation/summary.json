@@ -1,0 +1,8 @@
+{
+  "task_id": "django_32332",
+  "repo_path": "/home/furqan/ScenarioGenerated/real_project_repos/django_32332",
+  "env_name": "setup_django_32332",
+  "final_status": "FAIL_ON_BUGGY",
+  "final_test": "/home/furqan/ScenarioGenerated/testcopilot_real_project_output/django_32332_validation/fixed_test_final.py",
+  "history": "/home/furqan/ScenarioGenerated/testcopilot_real_project_output/django_32332_validation/validation_history.json"
+}
