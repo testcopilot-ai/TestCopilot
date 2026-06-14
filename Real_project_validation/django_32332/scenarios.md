@@ -1,0 +1,34 @@
+1. Scenario: Saving a child model after saving a parent with a non-numeric primary key (e.g., CharField primary key).
+   Condition: A parent model uses a CharField as its primary key. A child model has a ForeignKey to the parent. The parent is saved first, then the child is created with the parent assigned and saved.
+   Expected behavior: After saving the child, the ForeignKey relationship to the parent should be preserved. The child's foreign key field should correctly reference the parent's primary key value.
+   Why it exposes the issue: The bug causes the parent relationship to be lost when the parent uses a non-numeric primary key, so this scenario directly tests the reported failure.
+
+2. Scenario: Saving a child model after saving a parent with a UUID primary key.
+   Condition: A parent model uses a UUIDField as its primary key. A child model has a ForeignKey to the parent. The parent is saved, then the child is created with the parent assigned and saved.
+   Expected behavior: After saving the child, the ForeignKey relationship to the parent should be preserved. The child's foreign key field should correctly reference the parent's UUID primary key value.
+   Why it exposes the issue: The bug is not limited to CharField primary keys; it affects any non-numeric primary key. This scenario tests a UUID primary key, which is a common non-numeric type.
+
+3. Scenario: Saving a child model after saving a parent with a non-numeric primary key, using a OneToOneField instead of ForeignKey.
+   Condition: A parent model uses a CharField as its primary key. A child model has a OneToOneField to the parent. The parent is saved, then the child is created with the parent assigned and saved.
+   Expected behavior: After saving the child, the OneToOneField relationship to the parent should be preserved. The child's OneToOneField should correctly reference the parent's primary key value.
+   Why it exposes the issue: The bug may affect OneToOneField relationships similarly to ForeignKey, as they share underlying logic. This scenario tests a different relationship type.
+
+4. Scenario: Saving a child model after saving a parent with a non-numeric primary key, where the child is saved multiple times.
+   Condition: A parent model uses a CharField as its primary key. A child model has a ForeignKey to the parent. The parent is saved, then the child is created with the parent assigned and saved. Then the child is saved again without changes.
+   Expected behavior: After each save, the ForeignKey relationship to the parent should be preserved. The child's foreign key field should correctly reference the parent's primary key value after both saves.
+   Why it exposes the issue: The bug may only manifest on the first save or may persist across multiple saves. This scenario tests the stability of the relationship over repeated saves.
+
+5. Scenario: Saving a child model after saving a parent with a non-numeric primary key, using a model with a custom save method that calls super().save().
+   Condition: A parent model uses a CharField as its primary key. A child model has a ForeignKey to the parent and overrides the save method to perform additional logic before calling super().save(). The parent is saved, then the child is created with the parent assigned and saved.
+   Expected behavior: After saving the child, the ForeignKey relationship to the parent should be preserved. The child's foreign key field should correctly reference the parent's primary key value.
+   Why it exposes the issue: The bug may be triggered by the order of operations in the save method. This scenario tests a common pattern where the save method is customized.
+
+6. Scenario: Saving a child model after saving a parent with a non-numeric primary key, where the parent is retrieved from the database before assignment.
+   Condition: A parent model uses a CharField as its primary key. The parent is saved, then retrieved from the database using a query. The retrieved parent is assigned to a new child model, and the child is saved.
+   Expected behavior: After saving the child, the ForeignKey relationship to the parent should be preserved. The child's foreign key field should correctly reference the parent's primary key value.
+   Why it exposes the issue: The bug may be related to the state of the parent object after retrieval. This scenario tests whether the relationship is preserved when the parent is fetched from the database.
+
+7. Scenario: Saving a child model after saving a parent with a non-numeric primary key, where the child is created using a model form.
+   Condition: A parent model uses a CharField as its primary key. A child model has a ForeignKey to the parent. The parent is saved. A model form is created for the child with the parent assigned, and the form is saved.
+   Expected behavior: After saving the form, the ForeignKey relationship to the parent should be preserved. The child's foreign key field should correctly reference the parent's primary key value.
+   Why it exposes the issue: The bug may be triggered by the form saving process, which is a common way to create model instances. This scenario tests the issue in a realistic usage pattern.
