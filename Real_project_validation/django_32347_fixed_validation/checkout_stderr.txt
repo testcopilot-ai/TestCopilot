@@ -1,0 +1,2 @@
+Previous HEAD position was 42e8cf47c7 Fixed #32369 -- Fixed adding check constraints with pattern lookups and expressions as rhs.
+Switched to branch 'pr_13933'

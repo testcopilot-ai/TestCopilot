@@ -1,0 +1,14 @@
+Creating test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...
+test_invalid_choice_hyphenated_value (testcopilot_generated.test_generated_django_32347.Ticket32347RegressionTests) ... ok
+test_invalid_choice_long_value (testcopilot_generated.test_generated_django_32347.Ticket32347RegressionTests) ... ok
+test_invalid_choice_mixed_case_value (testcopilot_generated.test_generated_django_32347.Ticket32347RegressionTests) ... ok
+test_invalid_choice_number_like_string (testcopilot_generated.test_generated_django_32347.Ticket32347RegressionTests) ... ok
+test_invalid_choice_symbol_value (testcopilot_generated.test_generated_django_32347.Ticket32347RegressionTests) ... ok
+test_invalid_choice_text (testcopilot_generated.test_generated_django_32347.Ticket32347RegressionTests) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.016s
+
+OK
+Destroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...
+

@@ -1,0 +1,9 @@
+{
+  "task_id": "django_32347",
+  "status": "PASS_ON_FIXED",
+  "returncode": 0,
+  "fixed_repo": "/home/furqan/ScenarioGenerated/testcopilot_real_project_output/django_32347_fixed_validation/fixed_repo",
+  "generated_test": "/home/furqan/ScenarioGenerated/testcopilot_real_project_output/django_32347_fixed_validation/fixed_repo/tests/testcopilot_generated/test_generated_django_32347.py",
+  "stdout": "/home/furqan/ScenarioGenerated/testcopilot_real_project_output/django_32347_fixed_validation/fixed_stdout.txt",
+  "stderr": "/home/furqan/ScenarioGenerated/testcopilot_real_project_output/django_32347_fixed_validation/fixed_stderr.txt"
+}
