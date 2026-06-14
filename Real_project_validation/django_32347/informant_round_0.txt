@@ -1,0 +1,5 @@
+{
+  "verdict": "FAIL",
+  "feedback": "The test defines models inside test methods, which is not consistent with Django regression-test methodology. Django tests should define models in a models.py file or use a separate test app, not inline in test methods.",
+  "violations": ["6. The test must be consistent with Django regression-test methodology."]
+}

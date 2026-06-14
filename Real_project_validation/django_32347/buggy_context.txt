@@ -1,0 +1,1114 @@
+### File: django/contrib/admin/options.py
+import copy
+import json
+import operator
+import re
+from functools import partial, reduce, update_wrapper
+from urllib.parse import quote as urlquote
+
+from django import forms
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.admin import helpers, widgets
+from django.contrib.admin.checks import (
+    BaseModelAdminChecks, InlineModelAdminChecks, ModelAdminChecks,
+)
+from django.contrib.admin.decorators import display
+from django.contrib.admin.exceptions import DisallowedModelAdminToField
+from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
+from django.contrib.admin.utils import (
+    NestedObjects, construct_change_message, flatten_fieldsets,
+    get_deleted_objects, lookup_needs_distinct, model_format_dict,
+    model_ngettext, quote, unquote,
+)
+from django.contrib.admin.widgets import (
+    AutocompleteSelect, AutocompleteSelectMultiple,
+)
+from django.contrib.auth import get_permission_codename
+from django.core.exceptions import (
+    FieldDoesNotExist, FieldError, PermissionDenied, ValidationError,
+)
+from django.core.paginator import Paginator
+from django.db import models, router, transaction
+from django.db.models.constants import LOOKUP_SEP
+from django.forms.formsets import DELETION_FIELD_NAME, all_valid
+from django.forms.models import (
+    BaseInlineFormSet, inlineformset_factory, modelform_defines_fields,
+    modelform_factory, modelformset_factory,
+)
+from django.forms.widgets import CheckboxSelectMultiple, SelectMultiple
+from django.http import HttpResponseRedirect
+from django.http.response import HttpResponseBase
+from django.template.response import SimpleTemplateResponse, TemplateResponse
+from django.urls import reverse
+from django.utils.decorators import method_decorator
+from django.utils.html import format_html
+from django.utils.http import urlencode
+from django.utils.safestring import mark_safe
+from django.utils.text import (
+    capfirst, format_lazy, get_text_list, smart_split, unescape_string_literal,
+)
+from django.utils.translation import gettext as _, ngettext
+from django.views.decorators.csrf import csrf_protect
+from django.views.generic import RedirectView
+
+IS_POPUP_VAR = '_popup'
+TO_FIELD_VAR = '_to_field'
+
+
+HORIZONTAL, VERTICAL = 1, 2
+
+
+def get_content_type_for_model(obj):
+    # Since this module gets imported in the application's root package,
+    # it cannot import models from other applications at the module level.
+    from django.contrib.contenttypes.models import ContentType
+    return ContentType.objects.get_for_model(obj, for_concrete_model=False)
+
+
+def get_ul_class(radio_style):
+    return 'radiolist' if radio_style == VERTICAL else 'radiolist inline'
+
+
+class IncorrectLookupParameters(Exception):
+    pass
+
+
+# Defaults for formfield_overrides. ModelAdmin subclasses can change this
+# by adding to ModelAdmin.formfield_overrides.
+
+FORMFIELD_FOR_DBFIELD_DEFAULTS = {
+    models.DateTimeField: {
+        'form_class': forms.SplitDateTimeField,
+        'widget': widgets.AdminSplitDateTime
+    },
+    models.DateField: {'widget': widgets.AdminDateWidget},
+    models.TimeField: {'widget': widgets.AdminTimeWidget},
+    models.TextField: {'widget': widgets.AdminTextareaWidget},
+    models.URLField: {'widget': widgets.AdminURLFieldWidget},
+    models.IntegerField: {'widget': widgets.AdminIntegerFieldWidget},
+    models.BigIntegerField: {'widget': widgets.AdminBigIntegerFieldWidget},
+    models.CharField: {'widget': widgets.AdminTextInputWidget},
+    models.ImageField: {'widget': widgets.AdminFileWidget},
+    models.FileField: {'widget': widgets.AdminFileWidget},
+    models.EmailField: {'widget': widgets.AdminEmailInputWidget},
+    models.UUIDField: {'widget': widgets.AdminUUIDInputWidget},
+}
+
+csrf_protect_m = method_decorator(csrf_protect)
+
+
+class BaseModelAdmin(metaclass=forms.MediaDefiningClass):
+    """Functionality common to both ModelAdmin and InlineAdmin."""
+
+    autocomplete_fields = ()
+    raw_id_fields = ()
+    fields = None
+    exclude = None
+    fieldsets = None
+    form = forms.ModelForm
+    filter_vertical = ()
+    filter_horizontal = ()
+    radio_fields = {}
+    prepopulated_fields = {}
+    formfield_overrides = {}
+    readonly_fields = ()
+    ordering = None
+    sortable_by = None
+    view_on_site = True
+    show_full_result_count = True
+    checks_class = BaseModelAdminChecks
+
+    def check(self, **kwargs):
+        return self.checks_class().check(self, **kwargs)
+
+    def __init__(self):
+        # Merge FORMFIELD_FOR_DBFIELD_DEFAULTS with the formfield_overrides
+        # rather than simply overwriting.
+        overrides = copy.deepcopy(FORMFIELD_FOR_DBFIELD_DEFAULTS)
+        for k, v in self.formfield_overrides.items():
+            overrides.setdefault(k, {}).update(v)
+        self.formfield_overrides = overrides
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        """
+        Hook for specifying the form Field instance for a given database Field
+        instance.
+
+        If kwargs are given, t
+
+
+### File: django/db/models/fields/__init__.py
+import collections.abc
+import copy
+import datetime
+import decimal
+import operator
+import uuid
+import warnings
+from base64 import b64decode, b64encode
+from functools import partialmethod, total_ordering
+
+from django import forms
+from django.apps import apps
+from django.conf import settings
+from django.core import checks, exceptions, validators
+from django.db import connection, connections, router
+from django.db.models.constants import LOOKUP_SEP
+from django.db.models.query_utils import DeferredAttribute, RegisterLookupMixin
+from django.utils import timezone
+from django.utils.datastructures import DictWrapper
+from django.utils.dateparse import (
+    parse_date, parse_datetime, parse_duration, parse_time,
+)
+from django.utils.duration import duration_microseconds, duration_string
+from django.utils.functional import Promise, cached_property
+from django.utils.ipv6 import clean_ipv6_address
+from django.utils.itercompat import is_iterable
+from django.utils.text import capfirst
+from django.utils.translation import gettext_lazy as _
+
+__all__ = [
+    'AutoField', 'BLANK_CHOICE_DASH', 'BigAutoField', 'BigIntegerField',
+    'BinaryField', 'BooleanField', 'CharField', 'CommaSeparatedIntegerField',
+    'DateField', 'DateTimeField', 'DecimalField', 'DurationField',
+    'EmailField', 'Empty', 'Field', 'FilePathField', 'FloatField',
+    'GenericIPAddressField', 'IPAddressField', 'IntegerField', 'NOT_PROVIDED',
+    'NullBooleanField', 'PositiveBigIntegerField', 'PositiveIntegerField',
+    'PositiveSmallIntegerField', 'SlugField', 'SmallAutoField',
+    'SmallIntegerField', 'TextField', 'TimeField', 'URLField', 'UUIDField',
+]
+
+
+class Empty:
+    pass
+
+
+class NOT_PROVIDED:
+    pass
+
+
+# The values to use for "blank" in SelectFields. Will be appended to the start
+# of most "choices" lists.
+BLANK_CHOICE_DASH = [("", "---------")]
+
+
+def _load_field(app_label, model_name, field_name):
+    return apps.get_model(app_label, model_name)._meta.get_field(field_name)
+
+
+# A guide to Field parameters:
+#
+#   * name:      The name of the field specified in the model.
+#   * attname:   The attribute to use on the model object. This is the same as
+#                "name", except in the case of ForeignKeys, where "_id" is
+#                appended.
+#   * db_column: The db_column specified in the model (or None).
+#   * column:    The database column for this field. This is the same as
+#                "attname", except if db_column is specified.
+#
+# Code that introspects values, or does other dynamic things, should use
+# attname. For example, this gets the primary key value of object "obj":
+#
+#     getattr(obj, opts.pk.attname)
+
+def _empty(of_cls):
+    new = Empty()
+    new.__class__ = of_cls
+    return new
+
+
+def return_None():
+    return None
+
+
+@total_ordering
+class Field(RegisterLookupMixin):
+    """Base class for all field types"""
+
+    # Designates whether empty strings fundamentally are allowed at the
+    # database level.
+    empty_strings_allowed = True
+    empty_values = list(validators.EMPTY_VALUES)
+
+    # These track each time a Field instance is created. Used to retain order.
+    # The auto_creation_counter is used for fields that Django implicitly
+    # creates, creation_counter is used for all user-specified fields.
+    creation_counter = 0
+    auto_creation_counter = -1
+    default_validators = []  # Default set of validators
+    default_error_messages = {
+        'invalid_choice': _('Value %(value)r is not a valid choice.'),
+        'null': _('This field cannot be null.'),
+        'blank': _('This field cannot be blank.'),
+        'unique': _('%(model_name)s with this %(field_label)s '
+                    'already exists.'),
+        # Translators: The 'lookup_type' is one of 'date', 'year' or 'month'.
+        # Eg: "Title must be unique for pub_date year"
+        'unique_for_date': _("%(field_label)s must be unique for "
+                             "%(date_field_label)s %(lookup_type)s."),
+    }
+    system_check_deprecated_details = None
+    system_check_removed_details = None
+
+    # Field flags
+    hidden = False
+
+    many_to_many = None
+    many_to_one = None
+    one_to_many = None
+    one_to_one = None
+    related_model = None
+
+    descriptor_class = DeferredAttribute
+
+    # Generic field type description, usually overridden by subclasses
+    def _description(self):
+        return _('Field of type: %(field_type)s') % {
+            'field_type': self.__class__.__name__
+        }
+    description = property(_description)
+
+    def __init__(self, verbose_name=None, name=None, primary_key=False,
+                 max_length=None, unique=False, blank=False, null=False,
+                 db_index=False, rel=None, default=NOT_PROVIDED, editable=True,
+                 serialize=True, unique_for_date=None, unique_for_month=None,
+                 unique_for_year=None, choices=None, help_text='', db_column=None,
+                 db_tablespace=None, auto_created=False, validators=(),
+                 error_messages=None):
+        self.name = name
+
+
+
+### File: django/db/models/sql/query.py
+"""
+Create SQL statements for QuerySets.
+
+The code in here encapsulates all of the SQL construction so that QuerySets
+themselves do not have to (and could be backed by things other than SQL
+databases). The abstraction barrier only works one way: this module has to know
+all about the internals of models in order to get the information it needs.
+"""
+import copy
+import difflib
+import functools
+import sys
+from collections import Counter, namedtuple
+from collections.abc import Iterator, Mapping
+from itertools import chain, count, product
+from string import ascii_uppercase
+
+from django.core.exceptions import FieldDoesNotExist, FieldError
+from django.db import DEFAULT_DB_ALIAS, NotSupportedError, connections
+from django.db.models.aggregates import Count
+from django.db.models.constants import LOOKUP_SEP
+from django.db.models.expressions import (
+    BaseExpression, Col, Exists, F, OuterRef, Ref, ResolvedOuterRef,
+)
+from django.db.models.fields import Field
+from django.db.models.fields.related_lookups import MultiColSource
+from django.db.models.lookups import Lookup
+from django.db.models.query_utils import (
+    Q, check_rel_lookup_compatibility, refs_expression,
+)
+from django.db.models.sql.constants import INNER, LOUTER, ORDER_DIR, SINGLE
+from django.db.models.sql.datastructures import (
+    BaseTable, Empty, Join, MultiJoin,
+)
+from django.db.models.sql.where import (
+    AND, OR, ExtraWhere, NothingNode, WhereNode,
+)
+from django.utils.functional import cached_property
+from django.utils.hashable import make_hashable
+from django.utils.tree import Node
+
+__all__ = ['Query', 'RawQuery']
+
+
+def get_field_names_from_opts(opts):
+    return set(chain.from_iterable(
+        (f.name, f.attname) if f.concrete else (f.name,)
+        for f in opts.get_fields()
+    ))
+
+
+def get_children_from_q(q):
+    for child in q.children:
+        if isinstance(child, Node):
+            yield from get_children_from_q(child)
+        else:
+            yield child
+
+
+JoinInfo = namedtuple(
+    'JoinInfo',
+    ('final_field', 'targets', 'opts', 'joins', 'path', 'transform_function')
+)
+
+
+class RawQuery:
+    """A single raw SQL query."""
+
+    def __init__(self, sql, using, params=()):
+        self.params = params
+        self.sql = sql
+        self.using = using
+        self.cursor = None
+
+        # Mirror some properties of a normal query so that
+        # the compiler can be used to process results.
+        self.low_mark, self.high_mark = 0, None  # Used for offset/limit
+        self.extra_select = {}
+        self.annotation_select = {}
+
+    def chain(self, using):
+        return self.clone(using)
+
+    def clone(self, using):
+        return RawQuery(self.sql, using, params=self.params)
+
+    def get_columns(self):
+        if self.cursor is None:
+            self._execute_query()
+        converter = connections[self.using].introspection.identifier_converter
+        return [converter(column_meta[0])
+                for column_meta in self.cursor.description]
+
+    def __iter__(self):
+        # Always execute a new query for a new iterator.
+        # This could be optimized with a cache at the expense of RAM.
+        self._execute_query()
+        if not connections[self.using].features.can_use_chunked_reads:
+            # If the database can't use chunked reads we need to make sure we
+            # evaluate the entire query up front.
+            result = list(self.cursor)
+        else:
+            result = self.cursor
+        return iter(result)
+
+    def __repr__(self):
+        return "<%s: %s>" % (self.__class__.__name__, self)
+
+    @property
+    def params_type(self):
+        if self.params is None:
+            return None
+        return dict if isinstance(self.params, Mapping) else tuple
+
+    def __str__(self):
+        if self.params_type is None:
+            return self.sql
+        return self.sql % self.params_type(self.params)
+
+    def _execute_query(self):
+        connection = connections[self.using]
+
+        # Adapt parameters to the database, as much as possible considering
+        # that the target type isn't known. See #17755.
+        params_type = self.params_type
+        adapter = connection.ops.adapt_unknown_value
+        if params_type is tuple:
+            params = tuple(adapter(val) for val in self.params)
+        elif params_type is dict:
+            params = {key: adapter(val) for key, val in self.params.items()}
+        elif params_type is None:
+            params = None
+        else:
+            raise RuntimeError("Unexpected params type: %s" % params_type)
+
+        self.cursor = connection.cursor()
+        self.cursor.execute(self.sql, params)
+
+
+class Query(BaseExpression):
+    """A single SQL query."""
+
+    alias_prefix = 'T'
+    subq_aliases = frozenset([alias_prefix])
+
+    compiler = 'SQLCompiler'
+
+    def __init__(self, model, where=WhereNode, alias_cols=True):
+        self.model = model
+        self.alias_refcount = {}
+        # alias_map is the most important data structure regarding joins.
+        # It's used for recording w
+
+
+### File: django/contrib/auth/forms.py
+import unicodedata
+
+from django import forms
+from django.contrib.auth import (
+    authenticate, get_user_model, password_validation,
+)
+from django.contrib.auth.hashers import (
+    UNUSABLE_PASSWORD_PREFIX, identify_hasher,
+)
+from django.contrib.auth.models import User
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib.sites.shortcuts import get_current_site
+from django.core.exceptions import ValidationError
+from django.core.mail import EmailMultiAlternatives
+from django.template import loader
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
+from django.utils.text import capfirst
+from django.utils.translation import gettext, gettext_lazy as _
+
+UserModel = get_user_model()
+
+
+def _unicode_ci_compare(s1, s2):
+    """
+    Perform case-insensitive comparison of two identifiers, using the
+    recommended algorithm from Unicode Technical Report 36, section
+    2.11.2(B)(2).
+    """
+    return unicodedata.normalize('NFKC', s1).casefold() == unicodedata.normalize('NFKC', s2).casefold()
+
+
+class ReadOnlyPasswordHashWidget(forms.Widget):
+    template_name = 'auth/widgets/read_only_password_hash.html'
+    read_only = True
+
+    def get_context(self, name, value, attrs):
+        context = super().get_context(name, value, attrs)
+        summary = []
+        if not value or value.startswith(UNUSABLE_PASSWORD_PREFIX):
+            summary.append({'label': gettext("No password set.")})
+        else:
+            try:
+                hasher = identify_hasher(value)
+            except ValueError:
+                summary.append({'label': gettext("Invalid password format or unknown hashing algorithm.")})
+            else:
+                for key, value_ in hasher.safe_summary(value).items():
+                    summary.append({'label': gettext(key), 'value': value_})
+        context['summary'] = summary
+        return context
+
+
+class ReadOnlyPasswordHashField(forms.Field):
+    widget = ReadOnlyPasswordHashWidget
+
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("required", False)
+        kwargs.setdefault('disabled', True)
+        super().__init__(*args, **kwargs)
+
+
+class UsernameField(forms.CharField):
+    def to_python(self, value):
+        return unicodedata.normalize('NFKC', super().to_python(value))
+
+    def widget_attrs(self, widget):
+        return {
+            **super().widget_attrs(widget),
+            'autocapitalize': 'none',
+            'autocomplete': 'username',
+        }
+
+
+class UserCreationForm(forms.ModelForm):
+    """
+    A form that creates a user, with no privileges, from the given username and
+    password.
+    """
+    error_messages = {
+        'password_mismatch': _('The two password fields didn’t match.'),
+    }
+    password1 = forms.CharField(
+        label=_("Password"),
+        strip=False,
+        widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'}),
+        help_text=password_validation.password_validators_help_text_html(),
+    )
+    password2 = forms.CharField(
+        label=_("Password confirmation"),
+        widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'}),
+        strip=False,
+        help_text=_("Enter the same password as before, for verification."),
+    )
+
+    class Meta:
+        model = User
+        fields = ("username",)
+        field_classes = {'username': UsernameField}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self._meta.model.USERNAME_FIELD in self.fields:
+            self.fields[self._meta.model.USERNAME_FIELD].widget.attrs['autofocus'] = True
+
+    def clean_password2(self):
+        password1 = self.cleaned_data.get("password1")
+        password2 = self.cleaned_data.get("password2")
+        if password1 and password2 and password1 != password2:
+            raise ValidationError(
+                self.error_messages['password_mismatch'],
+                code='password_mismatch',
+            )
+        return password2
+
+    def _post_clean(self):
+        super()._post_clean()
+        # Validate the password after self.instance is updated with form data
+        # by super().
+        password = self.cleaned_data.get('password2')
+        if password:
+            try:
+                password_validation.validate_password(password, self.instance)
+            except ValidationError as error:
+                self.add_error('password2', error)
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.set_password(self.cleaned_data["password1"])
+        if commit:
+            user.save()
+        return user
+
+
+class UserChangeForm(forms.ModelForm):
+    password = ReadOnlyPasswordHashField(
+        label=_("Password"),
+        help_text=_(
+            'Raw passwords are not stored, so there is no way to see this '
+            'user’s password, but you can change the password using '
+            '<a href="{}">this form</a>.'
+        ),
+    )
+
+    class Meta:
+        model = User
+        field
+
+
+### File: django/forms/models.py
+"""
+Helper functions for creating Form classes from Django models
+and database field objects.
+"""
+from itertools import chain
+
+from django.core.exceptions import (
+    NON_FIELD_ERRORS, FieldError, ImproperlyConfigured, ValidationError,
+)
+from django.forms.fields import ChoiceField, Field
+from django.forms.forms import BaseForm, DeclarativeFieldsMetaclass
+from django.forms.formsets import BaseFormSet, formset_factory
+from django.forms.utils import ErrorList
+from django.forms.widgets import (
+    HiddenInput, MultipleHiddenInput, RadioSelect, SelectMultiple,
+)
+from django.utils.text import capfirst, get_text_list
+from django.utils.translation import gettext, gettext_lazy as _
+
+__all__ = (
+    'ModelForm', 'BaseModelForm', 'model_to_dict', 'fields_for_model',
+    'ModelChoiceField', 'ModelMultipleChoiceField', 'ALL_FIELDS',
+    'BaseModelFormSet', 'modelformset_factory', 'BaseInlineFormSet',
+    'inlineformset_factory', 'modelform_factory',
+)
+
+ALL_FIELDS = '__all__'
+
+
+def construct_instance(form, instance, fields=None, exclude=None):
+    """
+    Construct and return a model instance from the bound ``form``'s
+    ``cleaned_data``, but do not save the returned instance to the database.
+    """
+    from django.db import models
+    opts = instance._meta
+
+    cleaned_data = form.cleaned_data
+    file_field_list = []
+    for f in opts.fields:
+        if not f.editable or isinstance(f, models.AutoField) \
+                or f.name not in cleaned_data:
+            continue
+        if fields is not None and f.name not in fields:
+            continue
+        if exclude and f.name in exclude:
+            continue
+        # Leave defaults for fields that aren't in POST data, except for
+        # checkbox inputs because they don't appear in POST data if not checked.
+        if (
+            f.has_default() and
+            form[f.name].field.widget.value_omitted_from_data(form.data, form.files, form.add_prefix(f.name)) and
+            cleaned_data.get(f.name) in form[f.name].field.empty_values
+        ):
+            continue
+        # Defer saving file-type fields until after the other fields, so a
+        # callable upload_to can use the values from other fields.
+        if isinstance(f, models.FileField):
+            file_field_list.append(f)
+        else:
+            f.save_form_data(instance, cleaned_data[f.name])
+
+    for f in file_field_list:
+        f.save_form_data(instance, cleaned_data[f.name])
+
+    return instance
+
+
+# ModelForms #################################################################
+
+def model_to_dict(instance, fields=None, exclude=None):
+    """
+    Return a dict containing the data in ``instance`` suitable for passing as
+    a Form's ``initial`` keyword argument.
+
+    ``fields`` is an optional list of field names. If provided, return only the
+    named.
+
+    ``exclude`` is an optional list of field names. If provided, exclude the
+    named from the returned dict, even if they are listed in the ``fields``
+    argument.
+    """
+    opts = instance._meta
+    data = {}
+    for f in chain(opts.concrete_fields, opts.private_fields, opts.many_to_many):
+        if not getattr(f, 'editable', False):
+            continue
+        if fields is not None and f.name not in fields:
+            continue
+        if exclude and f.name in exclude:
+            continue
+        data[f.name] = f.value_from_object(instance)
+    return data
+
+
+def apply_limit_choices_to_to_formfield(formfield):
+    """Apply limit_choices_to to the formfield's queryset if needed."""
+    from django.db.models import Exists, OuterRef, Q
+    if hasattr(formfield, 'queryset') and hasattr(formfield, 'get_limit_choices_to'):
+        limit_choices_to = formfield.get_limit_choices_to()
+        if limit_choices_to:
+            complex_filter = limit_choices_to
+            if not isinstance(complex_filter, Q):
+                complex_filter = Q(**limit_choices_to)
+            complex_filter &= Q(pk=OuterRef('pk'))
+            # Use Exists() to avoid potential duplicates.
+            formfield.queryset = formfield.queryset.filter(
+                Exists(formfield.queryset.model._base_manager.filter(complex_filter)),
+            )
+
+
+def fields_for_model(model, fields=None, exclude=None, widgets=None,
+                     formfield_callback=None, localized_fields=None,
+                     labels=None, help_texts=None, error_messages=None,
+                     field_classes=None, *, apply_limit_choices_to=True):
+    """
+    Return a dictionary containing form fields for the given model.
+
+    ``fields`` is an optional list of field names. If provided, return only the
+    named fields.
+
+    ``exclude`` is an optional list of field names. If provided, exclude the
+    named fields from the returned fields, even if they are listed in the
+    ``fields`` argument.
+
+    ``widgets`` is a dictionary of model field names mapped to a widget.
+
+    ``formfield_callback`` is a callable that takes a model field and returns
+    a form field.
+
+    ``localized_fields`` is a
+
+
+### File: django/forms/fields.py
+"""
+Field classes.
+"""
+
+import copy
+import datetime
+import json
+import math
+import operator
+import os
+import re
+import uuid
+from decimal import Decimal, DecimalException
+from io import BytesIO
+from urllib.parse import urlsplit, urlunsplit
+
+from django.core import validators
+from django.core.exceptions import ValidationError
+from django.forms.boundfield import BoundField
+from django.forms.utils import from_current_timezone, to_current_timezone
+from django.forms.widgets import (
+    FILE_INPUT_CONTRADICTION, CheckboxInput, ClearableFileInput, DateInput,
+    DateTimeInput, EmailInput, FileInput, HiddenInput, MultipleHiddenInput,
+    NullBooleanSelect, NumberInput, Select, SelectMultiple,
+    SplitDateTimeWidget, SplitHiddenDateTimeWidget, Textarea, TextInput,
+    TimeInput, URLInput,
+)
+from django.utils import formats
+from django.utils.dateparse import parse_datetime, parse_duration
+from django.utils.duration import duration_string
+from django.utils.ipv6 import clean_ipv6_address
+from django.utils.regex_helper import _lazy_re_compile
+from django.utils.translation import gettext_lazy as _, ngettext_lazy
+
+__all__ = (
+    'Field', 'CharField', 'IntegerField',
+    'DateField', 'TimeField', 'DateTimeField', 'DurationField',
+    'RegexField', 'EmailField', 'FileField', 'ImageField', 'URLField',
+    'BooleanField', 'NullBooleanField', 'ChoiceField', 'MultipleChoiceField',
+    'ComboField', 'MultiValueField', 'FloatField', 'DecimalField',
+    'SplitDateTimeField', 'GenericIPAddressField', 'FilePathField',
+    'JSONField', 'SlugField', 'TypedChoiceField', 'TypedMultipleChoiceField',
+    'UUIDField',
+)
+
+
+class Field:
+    widget = TextInput  # Default widget to use when rendering this type of Field.
+    hidden_widget = HiddenInput  # Default widget to use when rendering this as "hidden".
+    default_validators = []  # Default set of validators
+    # Add an 'invalid' entry to default_error_message if you want a specific
+    # field error message not raised by the field validators.
+    default_error_messages = {
+        'required': _('This field is required.'),
+    }
+    empty_values = list(validators.EMPTY_VALUES)
+
+    def __init__(self, *, required=True, widget=None, label=None, initial=None,
+                 help_text='', error_messages=None, show_hidden_initial=False,
+                 validators=(), localize=False, disabled=False, label_suffix=None):
+        # required -- Boolean that specifies whether the field is required.
+        #             True by default.
+        # widget -- A Widget class, or instance of a Widget class, that should
+        #           be used for this Field when displaying it. Each Field has a
+        #           default Widget that it'll use if you don't specify this. In
+        #           most cases, the default widget is TextInput.
+        # label -- A verbose name for this field, for use in displaying this
+        #          field in a form. By default, Django will use a "pretty"
+        #          version of the form field name, if the Field is part of a
+        #          Form.
+        # initial -- A value to use in this Field's initial display. This value
+        #            is *not* used as a fallback if data isn't given.
+        # help_text -- An optional string to use as "help text" for this Field.
+        # error_messages -- An optional dictionary to override the default
+        #                   messages that the field will raise.
+        # show_hidden_initial -- Boolean that specifies if it is needed to render a
+        #                        hidden widget with initial value after widget.
+        # validators -- List of additional validators to use
+        # localize -- Boolean that specifies if the field should be localized.
+        # disabled -- Boolean that specifies whether the field is disabled, that
+        #             is its widget is shown in the form but not editable.
+        # label_suffix -- Suffix to be added to the label. Overrides
+        #                 form's label_suffix.
+        self.required, self.label, self.initial = required, label, initial
+        self.show_hidden_initial = show_hidden_initial
+        self.help_text = help_text
+        self.disabled = disabled
+        self.label_suffix = label_suffix
+        widget = widget or self.widget
+        if isinstance(widget, type):
+            widget = widget()
+        else:
+            widget = copy.deepcopy(widget)
+
+        # Trigger the localization machinery if needed.
+        self.localize = localize
+        if self.localize:
+            widget.is_localized = True
+
+        # Let the widget know whether it should display as required.
+        widget.is_required = self.required
+
+        # Hook into self.widget_attrs() for any Field-specific HTML attributes.
+        extra_attrs = self.widget_attrs(widget)
+        if extra_attrs:
+            widget.attrs.update(extra_attrs)
+
+        self.widget = widget
+
+        messages = {}
+        for c in reversed(self.__class__.__mro__):
+            messages.update(g
+
+
+### File: django/db/models/base.py
+import copy
+import inspect
+import warnings
+from functools import partialmethod
+from itertools import chain
+
+import django
+from django.apps import apps
+from django.conf import settings
+from django.core import checks
+from django.core.exceptions import (
+    NON_FIELD_ERRORS, FieldDoesNotExist, FieldError, MultipleObjectsReturned,
+    ObjectDoesNotExist, ValidationError,
+)
+from django.db import (
+    DEFAULT_DB_ALIAS, DJANGO_VERSION_PICKLE_KEY, DatabaseError, connection,
+    connections, router, transaction,
+)
+from django.db.models import (
+    NOT_PROVIDED, ExpressionWrapper, IntegerField, Max, Value,
+)
+from django.db.models.constants import LOOKUP_SEP
+from django.db.models.constraints import CheckConstraint, UniqueConstraint
+from django.db.models.deletion import CASCADE, Collector
+from django.db.models.fields.related import (
+    ForeignObjectRel, OneToOneField, lazy_related_operation, resolve_relation,
+)
+from django.db.models.functions import Coalesce
+from django.db.models.manager import Manager
+from django.db.models.options import Options
+from django.db.models.query import F, Q
+from django.db.models.signals import (
+    class_prepared, post_init, post_save, pre_init, pre_save,
+)
+from django.db.models.utils import make_model_tuple
+from django.utils.encoding import force_str
+from django.utils.hashable import make_hashable
+from django.utils.text import capfirst, get_text_list
+from django.utils.translation import gettext_lazy as _
+
+
+class Deferred:
+    def __repr__(self):
+        return '<Deferred field>'
+
+    def __str__(self):
+        return '<Deferred field>'
+
+
+DEFERRED = Deferred()
+
+
+def subclass_exception(name, bases, module, attached_to):
+    """
+    Create exception subclass. Used by ModelBase below.
+
+    The exception is created in a way that allows it to be pickled, assuming
+    that the returned exception class will be added as an attribute to the
+    'attached_to' class.
+    """
+    return type(name, bases, {
+        '__module__': module,
+        '__qualname__': '%s.%s' % (attached_to.__qualname__, name),
+    })
+
+
+def _has_contribute_to_class(value):
+    # Only call contribute_to_class() if it's bound.
+    return not inspect.isclass(value) and hasattr(value, 'contribute_to_class')
+
+
+class ModelBase(type):
+    """Metaclass for all models."""
+    def __new__(cls, name, bases, attrs, **kwargs):
+        super_new = super().__new__
+
+        # Also ensure initialization is only performed for subclasses of Model
+        # (excluding Model class itself).
+        parents = [b for b in bases if isinstance(b, ModelBase)]
+        if not parents:
+            return super_new(cls, name, bases, attrs)
+
+        # Create the class.
+        module = attrs.pop('__module__')
+        new_attrs = {'__module__': module}
+        classcell = attrs.pop('__classcell__', None)
+        if classcell is not None:
+            new_attrs['__classcell__'] = classcell
+        attr_meta = attrs.pop('Meta', None)
+        # Pass all attrs without a (Django-specific) contribute_to_class()
+        # method to type.__new__() so that they're properly initialized
+        # (i.e. __set_name__()).
+        contributable_attrs = {}
+        for obj_name, obj in attrs.items():
+            if _has_contribute_to_class(obj):
+                contributable_attrs[obj_name] = obj
+            else:
+                new_attrs[obj_name] = obj
+        new_class = super_new(cls, name, bases, new_attrs, **kwargs)
+
+        abstract = getattr(attr_meta, 'abstract', False)
+        meta = attr_meta or getattr(new_class, 'Meta', None)
+        base_meta = getattr(new_class, '_meta', None)
+
+        app_label = None
+
+        # Look for an application configuration to attach the model to.
+        app_config = apps.get_containing_app_config(module)
+
+        if getattr(meta, 'app_label', None) is None:
+            if app_config is None:
+                if not abstract:
+                    raise RuntimeError(
+                        "Model class %s.%s doesn't declare an explicit "
+                        "app_label and isn't in an application in "
+                        "INSTALLED_APPS." % (module, name)
+                    )
+
+            else:
+                app_label = app_config.label
+
+        new_class.add_to_class('_meta', Options(meta, app_label))
+        if not abstract:
+            new_class.add_to_class(
+                'DoesNotExist',
+                subclass_exception(
+                    'DoesNotExist',
+                    tuple(
+                        x.DoesNotExist for x in parents if hasattr(x, '_meta') and not x._meta.abstract
+                    ) or (ObjectDoesNotExist,),
+                    module,
+                    attached_to=new_class))
+            new_class.add_to_class(
+                'MultipleObjectsReturned',
+                subclass_exception(
+                    'MultipleObjectsReturned',
+                    tuple(
+                        x.MultipleObjectsReturned for x in parents if hasattr(x, '_meta') and not x._meta.abstract
+            
+
+
+### File: django/db/models/fields/related.py
+import functools
+import inspect
+from functools import partial
+
+from django import forms
+from django.apps import apps
+from django.conf import SettingsReference, settings
+from django.core import checks, exceptions
+from django.db import connection, router
+from django.db.backends import utils
+from django.db.models import Q
+from django.db.models.constants import LOOKUP_SEP
+from django.db.models.deletion import CASCADE, SET_DEFAULT, SET_NULL
+from django.db.models.query_utils import PathInfo
+from django.db.models.utils import make_model_tuple
+from django.utils.functional import cached_property
+from django.utils.translation import gettext_lazy as _
+
+from . import Field
+from .mixins import FieldCacheMixin
+from .related_descriptors import (
+    ForeignKeyDeferredAttribute, ForwardManyToOneDescriptor,
+    ForwardOneToOneDescriptor, ManyToManyDescriptor,
+    ReverseManyToOneDescriptor, ReverseOneToOneDescriptor,
+)
+from .related_lookups import (
+    RelatedExact, RelatedGreaterThan, RelatedGreaterThanOrEqual, RelatedIn,
+    RelatedIsNull, RelatedLessThan, RelatedLessThanOrEqual,
+)
+from .reverse_related import (
+    ForeignObjectRel, ManyToManyRel, ManyToOneRel, OneToOneRel,
+)
+
+RECURSIVE_RELATIONSHIP_CONSTANT = 'self'
+
+
+def resolve_relation(scope_model, relation):
+    """
+    Transform relation into a model or fully-qualified model string of the form
+    "app_label.ModelName", relative to scope_model.
+
+    The relation argument can be:
+      * RECURSIVE_RELATIONSHIP_CONSTANT, i.e. the string "self", in which case
+        the model argument will be returned.
+      * A bare model name without an app_label, in which case scope_model's
+        app_label will be prepended.
+      * An "app_label.ModelName" string.
+      * A model class, which will be returned unchanged.
+    """
+    # Check for recursive relations
+    if relation == RECURSIVE_RELATIONSHIP_CONSTANT:
+        relation = scope_model
+
+    # Look for an "app.Model" relation
+    if isinstance(relation, str):
+        if "." not in relation:
+            relation = "%s.%s" % (scope_model._meta.app_label, relation)
+
+    return relation
+
+
+def lazy_related_operation(function, model, *related_models, **kwargs):
+    """
+    Schedule `function` to be called once `model` and all `related_models`
+    have been imported and registered with the app registry. `function` will
+    be called with the newly-loaded model classes as its positional arguments,
+    plus any optional keyword arguments.
+
+    The `model` argument must be a model class. Each subsequent positional
+    argument is another model, or a reference to another model - see
+    `resolve_relation()` for the various forms these may take. Any relative
+    references will be resolved relative to `model`.
+
+    This is a convenience wrapper for `Apps.lazy_model_operation` - the app
+    registry model used is the one found in `model._meta.apps`.
+    """
+    models = [model] + [resolve_relation(model, rel) for rel in related_models]
+    model_keys = (make_model_tuple(m) for m in models)
+    apps = model._meta.apps
+    return apps.lazy_model_operation(partial(function, **kwargs), *model_keys)
+
+
+class RelatedField(FieldCacheMixin, Field):
+    """Base class that all relational fields inherit from."""
+
+    # Field flags
+    one_to_many = False
+    one_to_one = False
+    many_to_many = False
+    many_to_one = False
+
+    @cached_property
+    def related_model(self):
+        # Can't cache this property until all the models are loaded.
+        apps.check_models_ready()
+        return self.remote_field.model
+
+    def check(self, **kwargs):
+        return [
+            *super().check(**kwargs),
+            *self._check_related_name_is_valid(),
+            *self._check_related_query_name_is_valid(),
+            *self._check_relation_model_exists(),
+            *self._check_referencing_to_swapped_model(),
+            *self._check_clashes(),
+        ]
+
+    def _check_related_name_is_valid(self):
+        import keyword
+        related_name = self.remote_field.related_name
+        if related_name is None:
+            return []
+        is_valid_id = not keyword.iskeyword(related_name) and related_name.isidentifier()
+        if not (is_valid_id or related_name.endswith('+')):
+            return [
+                checks.Error(
+                    "The name '%s' is invalid related_name for field %s.%s" %
+                    (self.remote_field.related_name, self.model._meta.object_name,
+                     self.name),
+                    hint="Related name must be a valid Python identifier or end with a '+'",
+                    obj=self,
+                    id='fields.E306',
+                )
+            ]
+        return []
+
+    def _check_related_query_name_is_valid(self):
+        if self.remote_field.is_hidden():
+            return []
+        rel_query_name = self.related_query_name()
+        errors = []
+        if rel_query_name.endswith('_'):
+            errors.append(
+                checks.Error(
+                    "Reverse query name '%s'
