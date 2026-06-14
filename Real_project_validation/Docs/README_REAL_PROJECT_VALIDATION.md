@@ -544,11 +544,7 @@ For buggy validation, the import path must point to:
 
 ## 13. Security and Reproducibility Notes
 
-1. Do not commit API keys to the repository.
-2. Use environment variables such as `DEEPSEEK_API_KEY`.
-3. Rotate any key that was pasted in a terminal or shared in logs.
-4. Store raw outputs and validation logs, but remove secrets before publishing.
-5. Keep fixed-code patches separate from generation inputs to prevent leakage.
+
 
 Example `.env.example`:
 
